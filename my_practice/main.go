@@ -73,6 +73,7 @@ func main() {
 	// utils.Practice1_3()
 	// utils.Practice1_4()
 	// utils.Practice1_5()
+
 	// utils.Practice2_1()
 	// utils.Practice2_2()
 	// utils.Practice2_3()
@@ -83,5 +84,12 @@ func main() {
 	// utils.Practice2_8()
 	// utils.Practice2_9()
 	// utils.Practice2_10()
-	utils.Practice2_11()
+	// utils.Practice2_11()
+
+	// utils.Practice3_1()
+	// utils.Practice3_2()
+	// utils.Practice3_3()
+	// utils.Practice3_4()
+	// utils.Practice3_5()
+	utils.Practice3_6()
 }
