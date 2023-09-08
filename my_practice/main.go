@@ -4,6 +4,8 @@ import (
 	"go-study/my_practice/utils"
 )
 
+// Packages, variables, and functions
+
 // func main() {
 // 	fmt.Println("Hello, World!")
 // }
@@ -66,5 +68,20 @@ import (
 // }
 
 func main() {
-	utils.Practice1_1()
+	// utils.Practice1_1()
+	// utils.Practice1_2()
+	// utils.Practice1_3()
+	// utils.Practice1_4()
+	// utils.Practice1_5()
+	// utils.Practice2_1()
+	// utils.Practice2_2()
+	// utils.Practice2_3()
+	// utils.Practice2_4()
+	// utils.Practice2_5()
+	// utils.Practice2_6()
+	// utils.Practice2_7()
+	// utils.Practice2_8()
+	// utils.Practice2_9()
+	// utils.Practice2_10()
+	utils.Practice2_11()
 }
