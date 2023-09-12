@@ -2,6 +2,7 @@ package utils
 
 import (
 	"fmt"
+	"strings"
 )
 
 // Pointers
@@ -94,54 +95,196 @@ func Practice3_5() {
 }
 
 // Arrays
-// The type [n]T: `n`개의 type `T` 값을 가진 배열
+// 타입 [n]T: `n`개의 type `T` 값을 가진 배열
 func Practice3_6() {
 	// Array의 length는 type에 포함되어 있음.
 	var a [2]string
+	var b [3]float64
 	fmt.Println(a)
+	fmt.Println(b)
 	a[0] = "Hello"
 	a[1] = "World"
+
 	fmt.Println(a[0], a[1])
 	fmt.Println(a)
 
 	// 아래는 Go의 Array literal syntax
-	primes := [6]int{2, 3, 5, 7, 11, 13}
-	fmt.Println(primes)
+	primes := [6]int{2, 3, 5, 7, 11, 13} // **Initialized with values**
+	fmt.Println(primes) // [2 3 5 7 11 13]
+	var y [5]int = [5]int{10, 20, 30} // Partial assignment
+	fmt.Println(y) // [10 20 30 0 0]
 }
 
 // Slices
 func Practice3_7() {
-	
+	primes := [6]int{2, 3, 5, 7, 11, 13} 
+
+	//타입 []T: T타입의 값을 가진 슬라이스
+	var s []int = primes[1:4]
+	fmt.Println(s) // [3 5 7]
 }
 
+// Slices are like references to arrays
 
+// A slice does not store any data, it just describes a section of an underlying array.
+// Changing the elements of a slice modifies the corresponding elements of its underlying array.
+// Other slices that share the same underlying array will see those changes.
 func Practice3_8() {
-	
+	names := [4]string{
+		"John",
+		"Paul",
+		"George",
+		"Ringo",
+	}
+	fmt.Println(names)
+
+	a := names[0:2]
+	b := names[1:3]
+	fmt.Println(a, b)
+
+	b[0] = "XXX" // 슬라이스의 element를 바꾸면 원본 array의 해당 element가 바뀐다
+	fmt.Println(a, b)
+	fmt.Println(names) // [John XXX George Ringo]
 }
 
+// Slice literals
+// A slice literal is an array literal without the length
 
+// [3]bool{true, true, false} // array literal
+// []bool{true, true, false} // slice literal 
+// ** slice literal은 array literal로 만드는 것과 똑같은 array를 만든 후
+// ** 그 array를 reference하는 슬라이스를 build
 func Practice3_9() {
+	q := []int{2, 3, 5, 7, 11, 13} // 이때 array의 length가 6으로 고정됨
+	fmt.Println(q)
+
+	r := []bool{true, false, true, true, false, true}
+	fmt.Println(r)
+
+	s := []struct {
+		i int
+		b bool
+	}{
+		{2, true},
+		{3, false},
+		{5, true},
+		{7, true},
+		{11, false},
+		{13, true},
+	}
+	fmt.Println(s)
 	
 }
 
 
 func Practice3_10() {
-	
+	s := []int{2, 3, 5, 7, 11, 13}
+	s = s[:]
+	fmt.Println(s)
+	s = s[1:4]
+	fmt.Println(s)
+	s = s[:2]
+	fmt.Println(s)
+	s = s[1:]
+	fmt.Println(s)
 }
+
+// Slice length and capacity
+
+// The length of a slice is the number of elements it contains.
+// The capacity of a slice is the number of elements in the **underlying array**,
+// **counting from the first element in the slice.**
+
+// You can extend a slice's length by re-slicing it, provided it has sufficient capacity.
+
 
 func Practice3_11() {
-	
+	// 여기서 s는 array가 아니고 underlying array를 가리키는 slice
+	s := []int{2, 3, 5, 7, 11, 13}
+	printSlice3_11(s)
+
+	s = s[:]
+	printSlice3_11(s) // len=6 cap=6 [2 3 5 7 11 13]
+
+	s = s[:0] // Slice the slice to give it zero length.
+	printSlice3_11(s) // len=0 cap=6 []
+
+	// Extend its length.
+	s = s[:4]
+	printSlice3_11(s) // len=4 cap=6 [2 3 5 7]
+
+	// Drop its first two values.
+	s = s[2:]
+	printSlice3_11(s) // len=2 cap=4 [5 7]
 }
 
-func Practice3_12() {
-	
+// fyi: Forward declaration
+// (같은 패키지 내에서는 선언하기 전에 사용할 수 있다)
+func printSlice3_11(s []int) {
+	fmt.Printf("len=%d cap=%d %v\n", len(s), cap(s), s)
 }
+
+// Nil slices
+func Practice3_12() {
+	var s []int
+	fmt.Println(s, len(s), cap(s)) // [] 0 0
+	if s == nil {
+		fmt.Println("nil!")
+	}
+	// s[0] = 3 // 이 코드를 실행하면 에러 발생
+}
+
+// Creating a slice with make
+
+// Slices can be created with the build-in `make` function
+// This is how dynamically-sized arrays are made
 
 func Practice3_13() {
+	// The `make` function allocates a zeroed ARRAY and returns a SLICE
+	// that refers to that array
+	a := make([]int, 5)
+	printSlice3_13("a", a) // a len=5 cap=5 [0 0 0 0 0]
+
+	// To specify a capacity, pass a third argument to `make``:
+	b := make([]int, 0, 5) // [0 0 0 0 0]라는 array을 할당한 후 []라는 slice를 반환
+	printSlice3_13("b", b) // b len=0 cap=5 []
+
+	c := b[:2]             // [0 0 0 0 0]이라는 array에서 [:2]만큼 슬라이스
+	printSlice3_13("c", c) // c len=2 cap=5 [0 0]
+
+	d := c[2:5]            // [0 0 0 0 0]이라는 array에서 [2:5]만큼 슬라이스 
+	printSlice3_13("d", d) // d len=3 cap=3 [0 0 0]
 	
 }
 
+func printSlice3_13(s string, x []int) {
+	fmt.Printf("%s len=%d cap=%d %v\n",
+		s, len(x), cap(x), x)
+}
+
+
+// Slice of Slices
+
+// Slices can contain any type, including other slices.
 func Practice3_14() {
+	// Create a tic-tac-toe board.
+	board := [][]string{
+		[]string{"_", "_", "_"},
+		[]string{"_", "_", "_"},
+		[]string{"_", "_", "_"},
+	}
+
+	// The players take turns.
+	board[0][0] = "X"
+	board[2][2] = "O"
+	board[1][2] = "X"
+	board[1][0] = "O"
+	board[0][2] = "X"
+
+	for i := 0; i < len(board); i++ {
+		fmt.Printf("%s\n", strings.Join(board[i], " "))
+	}
+
 	
 }
 
