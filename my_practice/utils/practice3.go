@@ -283,13 +283,32 @@ func Practice3_14() {
 
 	for i := 0; i < len(board); i++ {
 		fmt.Printf("%s\n", strings.Join(board[i], " "))
-	}
+	}	
+}
 
+// Appending to a slice
+// It is common to append new elements to a slice.
+
+func Practice3_15() {
+	var s []int
+	printSlice3_15(s)
+
+	// append works on nil slices.
+	s = append(s, 0)
+	printSlice3_15(s)
+
+	// The slice grows as needed.
+	s = append(s, 1)
+	printSlice3_15(s)
+
+	// We can add more than one element at a time.
+	s = append(s, 2, 3, 4)
+	printSlice3_15(s)
 	
 }
 
-func Practice3_15() {
-	
+func printSlice3_15(s []int) {
+	fmt.Printf("len=%d cap=%d %v\n", len(s), cap(s), s)
 }
 
 func Practice3_16() {
