@@ -61,7 +61,7 @@ func Practice4_3() {
 	fmt.Println(f.Abs4_3())
 }
 
-// Pointer recievers
+// ** Pointer recievers
 
 // You can declare methods with pointer receivers.
 // This means the receiver type has the literal syntax *T for some type T.
@@ -80,6 +80,8 @@ func Practice4_3() {
 // The Scale method must have a pointer receiver to change the
 // Vertex value declared in the main function.
 
+// v가 포인터라는 뜻이 아니고,
+// v가 *Vertex 타입이라는 뜻으로, *Vertex는 Vertex타입의 어떤 값에 대한 포인터임
 func (v *Vertex) Scale(f float64) { // pointer receiver
 	v.X = v.X * f
 	v.Y = v.Y * f
@@ -114,7 +116,7 @@ func ScaleFunc(v *Vertex, f float64) { // argument로 pointer를 받음
 	v.Y *= f
 }
 
-func ScaleFunc2(v Vertex, f float64) {
+func ScaleFuncVal(v Vertex, f float64) { // argument로 value를 받음
 	v.X *= f
 	v.Y *= f
 }
@@ -122,7 +124,7 @@ func ScaleFunc2(v Vertex, f float64) {
 func Practice4_5() {
 	v := Vertex{3, 4}
 	// ScaleFunc(v, 10) // Complile Error
-	ScaleFunc2(v, 10)
+	ScaleFuncVal(v, 10)
 	fmt.Println(AbsFunc(v))
 	ScaleFunc(&v, 10)
 	fmt.Println(AbsFunc(v))
@@ -134,11 +136,31 @@ func Practice4_5() {
 // pointer가 아니라 value를 넘겨도 pointer receiver가 자동으로 call 됨.
 
 func Practice4_6() {
-	
+	v := Vertex{3, 4} // v는 포인터가 아님
+	v.Scale(2) // {6, 8}
+	ScaleFunc(&v, 10) // &v는 포인터임. {60, 80}
+
+	p := &Vertex{4, 3} // p는 포인터
+	p.Scale(3) // {12, 9}
+	ScaleFunc(p, 8) // {96, 72}
+
+	fmt.Println(v, p) // v는 포인터가 아니고 p는 포인터임
 }
+
+
+// Methods and pointer indirection 2
+
+
 func Practice4_7() {
-	
+	v := Vertex{3, 4}
+	fmt.Println(v.Abs())
+	fmt.Println(AbsFunc(v))
+
+	p := &Vertex{4,3}
+	fmt.Println(p.Abs())
+	fmt.Println(AbsFunc(*p))
 }
+
 func Practice4_8() {
 	
 }
