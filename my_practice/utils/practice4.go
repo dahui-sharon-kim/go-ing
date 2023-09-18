@@ -149,7 +149,8 @@ func Practice4_6() {
 
 
 // Methods and pointer indirection 2
-
+// Functions that take a value argument must take a value of that specific type.
+// Methods with value receivers take either a value or a pointer as the receiver when they are called.
 
 func Practice4_7() {
 	v := Vertex{3, 4}
@@ -161,6 +162,7 @@ func Practice4_7() {
 	fmt.Println(AbsFunc(*p))
 }
 
+// Choosing a value or pointer receiver
 func Practice4_8() {
 	
 }
