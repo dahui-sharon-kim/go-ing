@@ -49,7 +49,7 @@ type MyFloat float64
 // You cannot declare a method with a receiver whose type is defined
 // in another package (int 같은 built-in types도 안 됨!!).
 
-func (f MyFloat) Abs4_3() float64 {
+func (f MyFloat) Abs() float64 {
 	if f < 0 {
 		return float64(-f)
 	}
@@ -58,7 +58,7 @@ func (f MyFloat) Abs4_3() float64 {
 
 func Practice4_3() {
 	f := MyFloat(-math.Sqrt2)
-	fmt.Println(f.Abs4_3())
+	fmt.Println(f.Abs())
 }
 
 // ** Pointer recievers
@@ -163,39 +163,289 @@ func Practice4_7() {
 }
 
 // Choosing a value or pointer receiver
+// There are two reasons to use a pointer receiver.
+// The first is so that the method can modify the value that its receiver points to.
+// The second is to avoid copying the value on each method call.
+// This can be more efficient if the receiver is a large struct, for example.
+
+// In this example, both Scale and Abs are methods with receiver type *Vertex,
+// even though the Abs method needn't modify its receiver.
+// In general, all methods on a given type should have either value or pointer receivers,
+// but not a mixture of both. (We'll see why over the next few pages.)
+
 func Practice4_8() {
-	
+	v := &Vertex{3, 4}
+	fmt.Printf("Before scaling: %+v, Abs: %v\n", v, v.Abs())
+	v.Scale(5)
+	fmt.Printf("After scaling: %+v, Abs: %v\n", v, v.Abs())
 }
+
+// Interfaces
+
+// An interface type is defined as a set of method signatures.
+// A value of interface type can hold any value that implements those methods.
+// 인터페이스 타입을 가지는 어떠한 값은 인터페이스 내의 메소드를 구현하는 어떠한 값이든 가질 수 있다.
+
+type Abser interface {
+	Abs() float64
+}
+
 func Practice4_9() {
-	
+	var a Abser
+	f := MyFloat(-math.Sqrt2)
+	v := Vertex{3, 4}
+
+	a = f   // a MyFloat implements Abser
+	fmt.Println(a.Abs()) // 1.4142135623730951
+	a = &v  // a *Vertex implements Abser
+	fmt.Println(a.Abs()) // 5
 }
+
+// Interfaces are implemented implicitly
+
+// 타입은 메소드를 구현함으로써 인터페이스를 구현한다. A type implements an interface by implementing its methods.
+// There is no explicit declaration of intent, no "implements" keyword.
+// Implicit interfaces decouple the definition of an interface from its implementation,
+// which could then appear in any package without prearrangement.
+
+type I interface {
+	M()
+}
+
+type T struct {
+	S string
+}
+
+// This method means type T implements the interface I,
+// but we don't need to explicitly declare that it does so.
+
+func (t T) M() {
+	fmt.Println(t.S)
+}
+
 func Practice4_10() {
-	
+	var i I = T{"hello"}
+	i.M()
 }
+
+// Interface values (== instance)
+
+// Under the hood, interface values can be thought of a s a tuple of a value and a concrete type: (value, type)
+// An interface value holds a value of a specific underlying concrete type.
+// Calling a method on an interface value executes the method of the same name on its underlying type.
+
+type I2 interface {
+	M2()
+}
+
+func (t *T) M2() {
+	fmt.Println(t.S)
+}
+
+type F float64
+
+func (f F) M2() {
+	fmt.Println(f)
+}
+
 func Practice4_11() {
-	
+	var i I2
+	i = &T{"hello"} // interface value == instance
+	describe(i)     // (&{hello}, *utils.T)
+	i.M2()          // hello
+
+	i = F(math.Pi)  // interface value == instance  
+	describe(i)     // (3.141592653589793, utils.F)
+	i.M2()          // 3.141592653589793
 }
+
+func describe(i I2) {
+	fmt.Printf("(%v, %T)\n", i, i)
+}
+
+
+// Interface values with nil underlying values
+
+// If the concrete value inside the interface itself is nil, the method will be called with a nil receiver.
+// In some languages this would trigger a null pointer exception, but in Go it is common to write methods
+// that gracefully handle being called with a nil receiver
+// (as with the method `M` in this example)
+
+// Note that an interface value that holds a nil concrete value is itself non-nil.
+
+type I3 interface {
+	M3()
+}
+
+func (t *T) M3() {
+	if t == nil {
+		fmt.Println("<nil>")
+		return
+	}
+	fmt.Println(t.S) // t
+}
+
 func Practice4_12() {
-	
+	var i I3
+
+	var t *T
+	i = t
+	describe3(i)     // (<nil>, *utils.T)
+	i.M3()           // <nil>
+
+	i = &T{"hello"} 
+	describe3(i)     // (&{hello}, *utils.T)
+	i.M3()           // hello
 }
+
+// Nil interface values
+
+// A nil interface value holds neither value nor concrete type.
+// Calling a method on a nil interface is a run-time error because there is no type inside the interface tuple
+// to indicate which concrete method to call.
+
+func describe3(i I3) {
+	fmt.Printf("(%v, %T)\n", i, i)
+}
+
+// Nil interface values
+
+// A nil interface value holds neithe value nor concrete type.
+// Calling a method on a nil interface is a run-time error because there is no type inside the interface tuple to
+// indicate which concrete method to call.
+
 func Practice4_13() {
-	
+	var i I3
+	describe3(i)
+	i.M3() // run-time error
 }
+
+// The empty interface
+
+// The interface type that specifies zero methods is known as the empty interface: `interface {}`
+// An empty interface may hold values of any type. (Every type implements at least zero methods.)
+// Empty interfaces are used by code that handles values of unknown type.
+// For example, `fmt.Print` takes any number of arguments of type `interface{}`
+
+
+func describe4(i interface{}) {
+	fmt.Printf("(%v, %T)\n", i, i)
+}
+
 func Practice4_14() {
-	
+	var i interface{}
+	describe4(i)
+
+	i = 42
+	describe4(i)
+
+	i = "hello"
+	describe4(i)
 }
+
+
+// Type assertions (타입 단언)
+
+// A type assertion provides access to an interface value's underlying concrete value.
+// `t := i.(T)`
+// This statement asserts the interface value i holds the concrete type T and
+// assigns the underlying T value to the variable t.
+
+// If `i` does not hold a `T`, the statement will trigger a panic.
+// To test whether an interface value holds a psecific type, a type assertion can return two values:
+// the underlying valud and a boolean value that reports whethr the assertion succeeded.
+
+// `t, ok := i.(T)`
+// If `i` holds a `T`, then `t` will be the underlying value and `ok` will be true.
+// If not, `ok` will be false and `t` will be the zero value of type `T`, and no panic occurs.
+// Note the similarity btw this syntax and that of reading from a map.
+
 func Practice4_15() {
-	
+	var i interface{} = "hello"
+
+	s := i.(string)
+	fmt.Println(s) // hello
+
+	s, ok := i.(string)
+	fmt.Println(s, ok) // hello true ("hello" is the underlying value)
+
+	f, ok := i.(float64)
+	fmt.Println(f, ok) // 0 false (float64 없기 때문에 float64의 zero value를 print)
+
+	f = i.(float64) // panic
+	fmt.Println(f)
 }
+
+
+// Type switches
+
+// A type switch is a construct that permits several type assertions in series.
+// A type switch is like a regular switch statement, but the cases in a type switch specify types (not values),
+// and those values are compared against the type of the value held by the given interface value.
+
+func do(i interface{}) {
+	switch v := i.(type) {
+	case int:
+		fmt.Printf("Twice %v is %v\n", v, v*2)
+	case string:
+		fmt.Printf("%q is %v bytes long\n", v, len(v))
+	default:
+		fmt.Printf("I don't know about type %T!\n", v)
+	}
+}
+
+// The declaration in a type switch has the same syntax as a type assertion `i.(T)`,
+// but the specific type `T` is replaced with the keyword `type`.
+
+// This switch statement tests whether the interface value `i` holds a value of type of `int` or `string` (in the example)
+
 func Practice4_16() {
-	
+	do(21)
+	do("hello")
+	do(true)
 }
+
+// Stringers
+
+// One of the most ubiquitos interfaces is Stringer defined by the fmt package.
+// A Stringer is a type that can describe itself as a string.
+// The fmt package (and many others) look for this interface to print values.
+
+type Stringer interface {
+	String() string
+} 
+
+type Person struct {
+	Name string
+	Age  int
+}
+
+func (p Person) String() string {
+	return fmt.Sprintf("%v (%v years)", p.Name, p.Age)
+}
+
 func Practice4_17() {
-	
+	a := Person{"Arthur Dent", 42}	
+	z := Person{"Zaphod Beeblebrox", 9001}
+	fmt.Println(a, z)
 }
+
+type IPAddr [4]byte
+
+func (ip IPAddr) String() string {
+	return fmt.Sprintf("%d.%d.%d.%d", ip[0], ip[1], ip[2], ip[3])
+}
+
 func Practice4_18() {
-	
+	hosts := map[string]IPAddr{
+		"loopback":  {127, 0, 0, 1},
+		"googleDNS": {8, 8, 8, 8},
+	}
+	for name, ip := range hosts {
+		fmt.Printf("%v: %v\n", name, ip)
+	}
 }
+
 func Practice4_19() {
 	
 }
