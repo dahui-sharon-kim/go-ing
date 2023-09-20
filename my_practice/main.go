@@ -129,5 +129,9 @@ func main() {
 	// utils.Practice4_15()
 	// utils.Practice4_16()
 	// utils.Practice4_17()
-	utils.Practice4_18()
+	// utils.Practice4_18()
+	// utils.Practice4_19()
+	// utils.Practice4_20()
+	// utils.Practice4_21()
+	utils.Practice4_22()
 }

@@ -2,7 +2,10 @@ package utils
 
 import (
 	"fmt"
+	"io"
 	"math"
+	"strings"
+	"time"
 )
 
 // Go does not have classes. However, you can define methods on types.
@@ -394,9 +397,7 @@ func do(i interface{}) {
 	}
 }
 
-// The declaration in a type switch has the same syntax as a type assertion `i.(T)`,
-// but the specific type `T` is replaced with the keyword `type`.
-
+// The declaration in a type switch has the same syntax as a type assertion `i.(T)`, but the specific type `T` is replaced with the keyword `type`.
 // This switch statement tests whether the interface value `i` holds a value of type of `int` or `string` (in the example)
 
 func Practice4_16() {
@@ -407,9 +408,7 @@ func Practice4_16() {
 
 // Stringers
 
-// One of the most ubiquitos interfaces is Stringer defined by the fmt package.
-// A Stringer is a type that can describe itself as a string.
-// The fmt package (and many others) look for this interface to print values.
+// One of the most ubiquitos interfaces is Stringer defined by the fmt package. A Stringer is a type that can describe itself as a string. The fmt package (and many others) look for this interface to print values.
 
 type Stringer interface {
 	String() string
@@ -446,27 +445,142 @@ func Practice4_18() {
 	}
 }
 
+// Errors
+
+// Go programs express error state with `error` values.
+// The `error` type is a built-in interface similar to `fmt.Stringer`:
+// type error interface {
+// 		Error() string
+//}
+// (As with `fmt.Stringer`, the `fmt` package looks for the `error` interface when printing values.)
+// Functions often return an `error` value, and calling code should handle errors by testing whether the error equals `nil`.
+// A nil `error` denotes success; a non-nil `error` denotes failure
+
+// Defined a custom error type called MyError
+type MyError struct {
+	When time.Time
+	What string
+}
+
+// Implemented `Error` method for `MyError` type
+// In Go, to make a type an error, you need to implement the `error` interface, which consists of a single method called `Error() string`. This method returns a string representation of the error.
+
+func (e *MyError) Error() string {
+	return fmt.Sprintf("%s (at %v)", e.What, e.When)
+}
+
+// Define `run` function, which returns an error.
+func run() error {
+	// Create an instance of `MyError`
+	return &MyError{
+		time.Now(),
+		"it didn't work",
+	}
+}
+
+// In the context of error handling:
+// When a function returns `nil` as an error, it typically means that no error occurred, and the operation was successful
+// When a function returns non-`nil` error, it means an error did occur, and the error object contains information about what went wrong.
 func Practice4_19() {
-	
+	if err := run(); err != nil {
+		fmt.Println(err)
+	}
 }
+
+// Exercise: Errors
+
+type ErrNegativeSqrt float64
+
+func (e ErrNegativeSqrt) Error() string {
+	if e < 0 {
+		return fmt.Sprintf("cannot Sqrt negative number: %v", float64(e))
+	}
+	return ""
+}
+
+func Sqrt4_20(x float64) (float64, error) {
+	if x < 0 {
+		// ErrNegativeSqrt(x) is not calling a function.
+		// Instead, it's creating a new value of type ErrNegativeSqrt with the value x
+		// This works because ErrNegativeSqrt is an alias for float64
+		return 0, ErrNegativeSqrt(x)
+	}
+	return 0, nil
+}
+
 func Practice4_20() {
-	
+	fmt.Println(Sqrt4_20(2))
+	fmt.Println(Sqrt4_20(-2))
 }
+
+// Readers
+
+// The io package specifies the io.Reader interface, which represents the read end of a stream of data. The Go standard library contains many implementations of this interface, including files, network connections, compressors, ciphers, and others.
+
+// The io.Reader interface has a Read method:
+// `func (T) Read(b []byte) (n int, err error)`
+// Read populates the given byte slice with data and returns the number of bytes populated and an error value. It returns an io.EOF error when the stream ends.
+
+// The example code creates a strings.Reader and consumes its output 8 bytes at a time.
+
 func Practice4_21() {
-	
+	// strings.NewReader() 함수는 `*strings.Reader` 타입의 값을 만들고 반환
+	// 이 타입은 `io.Reader` 인터페이스를 구현
+	r := strings.NewReader("Hello, Reader!") // 변수 r은 *strings.Reader 타입의 값.
+	// strings.NewReader("Hello, Reader") creates a Reader that reads from the provided string.
+	b := make([]byte, 8)
+	for {
+		n, err := r.Read(b)
+		fmt.Printf("n = %v err = %v b = %v\n", n, err, b)
+		fmt.Printf("b[:n] = %q\n", b[:n])
+		if err == io.EOF {
+			break
+		}
+	}
 }
+
+// Exercise: Readers
+
+type MyReader4_22 struct {}
+
+func (r MyReader4_22) Read(b []byte) (int, error) {
+	for i := range b {
+		b[i] = 'A'
+	}
+	return len(b), nil
+}
+
 func Practice4_22() {
-	
+	// reader.Validate(MyReader4_22{})
 }
+
+// Exercise: rot13Reader
+
+// A common pattern is an io.Reader that wraps another io.Reader, modifying the stream in some way.
+// For example, the gzip.NewReader function takes an io.Reader (a stream of compressed data) and returns a *gzip.Reader that also implements io.Reader (a stream of the decompressed data).
+
+// Implement a rot13Reader that implements io.Reader and reads from an io.Reader, modifying the stream by applying the rot13 substitution cipher to all alphabetical characters.
+
+// The rot13Reader type is provided for you. Make it an io.Reader by implementing its Read method.
+
+type rot13Reader struct {
+	r io.Reader
+}
+
 func Practice4_23() {
-	
+	// s := strings.NewReader("Lbh penpxrq gur pbqr!")
+	// r := rot13Reader{s}
+	// io.Copy(os.Stdout, &r)
 }
+
 func Practice4_24() {
 	
 }
+
 func Practice4_25() {
 	
 }
+
 func Practice4_26() {
 	
 }
