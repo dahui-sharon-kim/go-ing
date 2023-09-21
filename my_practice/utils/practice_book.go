@@ -21,6 +21,9 @@ func ToUpper2(str string) string {
 	for _, c := range str {
 		if c >= 'a' && c <= 'z' {
 			builder.WriteRune('A' + (c -'a'))
+		} else {
+			builder.WriteRune(c)
 		}
-	} 
+	}
+	return builder.String()
 }

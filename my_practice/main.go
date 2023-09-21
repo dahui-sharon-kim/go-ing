@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"go-study/my_practice/utils"
 )
 
@@ -133,5 +134,8 @@ func main() {
 	// utils.Practice4_19()
 	// utils.Practice4_20()
 	// utils.Practice4_21()
-	utils.Practice4_22()
+	// utils.Practice4_22()
+
+	fmt.Println(utils.ToUpper1("Hello 월드!"))
+	fmt.Println(utils.ToUpper2("Hello 월드!"))
 }
